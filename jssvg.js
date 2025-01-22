@@ -1,5 +1,69 @@
 const paths = document.querySelectorAll('#map path');
 let isExpanded = false;
+
+function highlightSelectedPath() {
+    const pathName = localStorage.getItem("alina");
+    if (pathName) {
+        const path = document.querySelector(`#map path[name='${pathName}']`);
+        if (path) {
+            //path.style.fill = "#ffffff";
+            let sect = document.createElement('section');
+            let ul=document.createElement('ul');
+            const info = document.getElementById('info');
+
+            removeAllChildNodes(info);
+            removeAllChildNodes(ul);
+
+            info.style.display = 'block';
+            const h3=document.createElement('h3')
+            let img = document.createElement('img');
+            let but = document.createElement('button');
+
+            ul.setAttribute('id','ajutor');
+            but.setAttribute('id','aratatext');
+            but.setAttribute('class','buton');
+            but.innerText="Mai mult"
+            but.onclick=function aratatext(){
+                const text = document.getElementById("desc");
+                const buton = document.getElementById("aratatext");
+                text.classList.toggle("expanded");
+                isExpanded = !isExpanded;
+                buton.innerText = isExpanded ? "Mai putin" : "Mai mult";
+            };
+
+            let par= document.createElement('p');
+            par.setAttribute('id', 'desc');
+            par.setAttribute('class', 'articol content');
+            img.setAttribute('id', 'poza');
+            img.setAttribute('class', 'imagine1');
+
+            h3.className="h3";
+            const hr=document.createElement('hr')
+            hr.className="line";
+            h3.innerText=`Judetul ${pathName}`;
+            display(pathName);
+
+            sect.appendChild(par);
+            info.appendChild(h3);
+            info.appendChild(hr);
+            info.appendChild(img);
+            info.appendChild(sect);
+            info.appendChild(ul);
+            info.appendChild(but);
+
+            var origcolour="#6f9c76";
+            paths.forEach(p => p.style.fill = origcolour);
+            var colourr = "#004400";
+            path.style.fill = colourr;
+
+            localStorage.removeItem("alina");
+
+        }
+    }
+}
+window.onload = function() {
+    highlightSelectedPath();
+};
 async function getMainImage(jud) {
     const url = "https://ro.wikipedia.org/w/api.php?action=query&titles="+jud+"&prop=pageimages&format=json&pithumbsize=500&origin=*";
     const response = await fetch(url);
@@ -74,18 +138,27 @@ async function display (jud){
     }
     //cuvant.forEach((cuv)=>console.log(parseInfoboxData(cuv,da)));
 }
+function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+}
 paths.forEach(path => {
     path.addEventListener('click', () => {
         let sect = document.createElement('section');
         let ul=document.createElement('ul');
         const info = document.getElementById('info');
         const regname=path.getAttribute('name');
-        info.innerHTML = '';
-        ul.innerText='';
+        localStorage.setItem("alina", regname);
+        console.log(localStorage.getItem("alina"));
+        removeAllChildNodes(info);
+        removeAllChildNodes(ul);
+
         info.style.display = 'block';
         const h3=document.createElement('h3')
         let img = document.createElement('img');
         let but = document.createElement('button');
+
         ul.setAttribute('id','ajutor');
         but.setAttribute('id','aratatext');
         but.setAttribute('class','buton');
@@ -97,16 +170,19 @@ paths.forEach(path => {
             isExpanded = !isExpanded;
             buton.innerText = isExpanded ? "Mai putin" : "Mai mult";
         };
+
         let par= document.createElement('p');
         par.setAttribute('id', 'desc');
         par.setAttribute('class', 'articol content');
         img.setAttribute('id', 'poza');
         img.setAttribute('class', 'imagine1');
+
         h3.className="h3";
         const hr=document.createElement('hr')
         hr.className="line";
         h3.innerText=`Judetul ${regname}`;
         display(regname);
+
         sect.appendChild(par);
         info.appendChild(h3);
         info.appendChild(hr);
@@ -114,9 +190,11 @@ paths.forEach(path => {
         info.appendChild(sect);
         info.appendChild(ul);
         info.appendChild(but);
+
         var origcolour="#6f9c76";
         paths.forEach(p => p.style.fill = origcolour);
         var colour = "#004400";
         path.style.fill = colour;
+
     });
 });
