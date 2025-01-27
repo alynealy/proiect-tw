@@ -1,0 +1,169 @@
+//daisy.css
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #bde0fe;
+    margin: 0;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    width: max-width;
+    height: max-height;
+    background-color: #ffffff;
+    text-align: center;
+    vertical-align: middle;
+}
+
+img {
+    width: 100%;
+    height: auto;
+    transition: transform 0.5s;
+}
+ 
+.rotating-clockwise {
+    animation: rotate-clockwise 2s linear infinite;
+}
+
+.rotating-counterclockwise {
+    animation: rotate-counterclockwise 2s linear infinite;
+}
+
+@keyframes rotate-clockwise {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes rotate-counterclockwise {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(-360deg);
+    }
+}
+
+#counter {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    background: #fff;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+
+//daisy.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daisy Table</title>
+    <link rel="stylesheet" href="daisy.css">
+</head>
+<body>
+    <table id="daisy-table"></table>
+    <script src="daisy.js"></script>
+</body>
+</html>
+
+
+//daisy.js
+document.addEventListener('DOMContentLoaded', () => {
+    const table = document.getElementById('daisy-table');
+    const counterDiv = document.createElement('div');
+    counterDiv.id = 'counter';
+    document.body.appendChild(counterDiv);
+
+    let totalFlowers = parseInt(localStorage.getItem('flowerCount')) || 1;
+    updateCounter();
+
+    // Create the initial table with one daisy
+    const initialRow = table.insertRow();
+    const initialCell = initialRow.insertCell();
+    createDaisy(initialCell, 800);
+
+    // Keypress event
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'b') {
+            // Replace a random daisy with 4 smaller ones
+            const daisies = table.querySelectorAll('img');
+            if (daisies.length > 0) {
+                const randomIndex = Math.floor(Math.random() * daisies.length);
+                const targetDaisy = daisies[randomIndex];
+                const size = targetDaisy.width / 2;
+
+                const parentCell = targetDaisy.parentElement;
+                parentCell.innerHTML = '';
+                const newTable = document.createElement('table');
+                newTable.style.borderCollapse = 'collapse';
+                for (let i = 0; i < 2; i++) {
+                    const row = newTable.insertRow();
+                    for (let j = 0; j < 2; j++) {
+                        const cell = row.insertCell();
+                        createDaisy(cell, size);
+                    }
+                }
+                parentCell.appendChild(newTable);
+
+                totalFlowers += 3; // Add 3 more daisies
+                updateCounter();
+            }
+        }
+    });
+
+    // Add click event to rotate daisies
+    table.addEventListener('click', (event) => {
+        if (event.target.tagName === 'IMG') {
+            const img = event.target;
+            if (img.classList.contains('rotating-clockwise')) {
+                img.classList.remove('rotating-clockwise');
+                img.classList.add('rotating-counterclockwise');
+            } 
+            else if (img.classList.contains('rotating-counterclockwise')) {
+                img.classList.remove('rotating-counterclockwise');
+            } 
+            else {
+                img.classList.add('rotating-clockwise');
+            }
+        }
+    });
+
+    // Stop rotation on 'p' key
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'p') {
+            const daisies = table.querySelectorAll('img');
+            daisies.forEach((daisy) => {
+                daisy.classList.remove('rotating-clockwise', 'rotating-counterclockwise');
+            });
+        }
+    });
+
+    // Function to create a daisy in a table cell
+    function createDaisy(cell, size) {
+        const img = document.createElement('img');
+        img.src = 'b1.jpg';
+        img.style.width = `${size}px`;
+        cell.appendChild(img);
+    }
+
+    // Update the counter in the corner
+    function updateCounter() {
+        counterDiv.textContent = `Total flowers created: ${totalFlowers}`;
+        localStorage.setItem('flowerCount', totalFlowers);
+    }
+});
+
